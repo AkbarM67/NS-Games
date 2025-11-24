@@ -1,0 +1,219 @@
+/* Additional responsive improvements */
+
+/* Mobile First Approach */
+@media (max-width: 320px) {
+    /* Very small screens */
+    .login-form {
+        padding: 20px 15px !important;
+        margin: 10px 0 !important;
+    }
+    
+    .logo-box h1 {
+        font-size: 28px !important;
+    }
+    
+    .hero h1 {
+        font-size: 1.8rem !important;
+    }
+    
+    .section-title {
+        font-size: 1.5rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Small mobile screens */
+    .form-group input {
+        padding: 15px 18px !important;
+        font-size: 14px !important;
+    }
+    
+    .btn {
+        padding: 15px 25px !important;
+        font-size: 14px !important;
+    }
+    
+    .stat-value {
+        font-size: 28px !important;
+    }
+    
+    .greeting {
+        font-size: 24px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Tablet and large mobile */
+    .nav-links {
+        gap: 10px !important;
+    }
+    
+    .nav-links a {
+        padding: 6px 12px !important;
+        font-size: 13px !important;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+    
+    .feature-card {
+        padding: 25px 20px !important;
+    }
+    
+    .games-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Tablet landscape */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+}
+
+@media (min-width: 1025px) {
+    /* Desktop */
+    .container {
+        max-width: 1200px;
+    }
+    
+    .hero h1 {
+        font-size: 4.5rem;
+    }
+    
+    .section-title {
+        font-size: 3rem;
+    }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .logo-large img,
+    .logo-sidebar {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #1a1a1a;
+        --text-color: #ffffff;
+        --card-bg: #2d2d2d;
+    }
+    
+    /* This can be expanded based on user preference */
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .btn {
+        border: 2px solid currentColor !important;
+    }
+    
+    .form-group input {
+        border: 2px solid #333 !important;
+    }
+    
+    .form-group input:focus {
+        border-color: #000 !important;
+        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3) !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .header,
+    .footer,
+    .btn,
+    .nav-links {
+        display: none !important;
+    }
+    
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .hero,
+    .features,
+    .games {
+        background: white !important;
+        color: black !important;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .hero {
+        padding: 60px 0 40px !important;
+    }
+    
+    .hero h1 {
+        font-size: 2.5rem !important;
+    }
+    
+    .left-side {
+        height: 40vh !important;
+    }
+}
+
+/* Focus improvements for accessibility */
+.btn:focus,
+input:focus,
+a:focus {
+    outline: 3px solid #667eea !important;
+    outline-offset: 2px !important;
+}
+
+/* Loading states */
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Smooth scrolling for all browsers */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Better button hover states on touch devices */
+@media (hover: none) {
+    .btn:hover {
+        transform: none !important;
+    }
+    
+    .btn:active {
+        transform: scale(0.98) !important;
+    }
+}

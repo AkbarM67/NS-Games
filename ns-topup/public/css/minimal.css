@@ -1,0 +1,44 @@
+/* Minimal CSS for faster loading */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    line-height: 1.6;
+}
+
+/* Basic responsive */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .sidebar {
+        width: 100% !important;
+    }
+    
+    .main-content {
+        padding: 20px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .hero h1 {
+        font-size: 2rem !important;
+    }
+    
+    .login-form {
+        padding: 20px !important;
+    }
+}

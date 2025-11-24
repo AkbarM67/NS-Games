@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Build outputs
+dist/
+build/
+public/build/
+
+# Logs
+*.log
+logs/
+
+# Cache
+.cache/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Laravel specific
+storage/app/public/
+storage/logs/
+bootstrap/cache/
+
+# Development files
+*.bat
+*.html
+test_*
+debug-*
+create-*
+
+# Temporary files
+*.tmp
+*.temp

@@ -1,0 +1,2476 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "NS Games Topup API",
+        "description": "API untuk platform topup game, pulsa, dan e-wallet dengan integrasi Digiflazz dan Midtrans",
+        "contact": {
+            "name": "NS Games Support",
+            "email": "admin@nsgames.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Laravel Development Server"
+        },
+        {
+            "url": "http://localhost/NS-topupgames/ns-topup/public",
+            "description": "Laragon/XAMPP Server"
+        }
+    ],
+    "paths": {
+        "/admin/dashboard": {
+            "get": {
+                "tags": [
+                    "Admin - Dashboard"
+                ],
+                "summary": "Get admin dashboard statistics",
+                "operationId": "188ae5f20e10e9d5910716d5ddf9f77a",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard statistics"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/orders": {
+            "get": {
+                "tags": [
+                    "Admin - Orders"
+                ],
+                "summary": "Get all orders for admin",
+                "operationId": "3ffe512d82fd3487c1f5942914084744",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of orders"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/admin/orders/{id}/status": {
+            "put": {
+                "tags": [
+                    "Admin - Orders"
+                ],
+                "summary": "Update order status",
+                "operationId": "a3e753e32123d26b1d6405dfe3a23584",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "processing",
+                                            "success",
+                                            "failed"
+                                        ]
+                                    },
+                                    "note": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Order status updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/customers": {
+            "get": {
+                "tags": [
+                    "Admin - Customers"
+                ],
+                "summary": "Get all customers (Admin only)",
+                "operationId": "6c39193ba65031b296c9cafde2b762c1",
+                "responses": {
+                    "200": {
+                        "description": "List of customers",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "John Doe"
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "example": "john@example.com"
+                                                    },
+                                                    "phone": {
+                                                        "type": "string",
+                                                        "example": "081234567890"
+                                                    },
+                                                    "role": {
+                                                        "type": "string",
+                                                        "example": "customer"
+                                                    },
+                                                    "is_blocked": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "example": "2025-11-21T10:00:00.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/customers/{user}/block": {
+            "patch": {
+                "tags": [
+                    "Admin - Customers"
+                ],
+                "summary": "Block/Unblock customer (Admin only)",
+                "operationId": "7c70a2d3011c3c61740e18d5486c16e1",
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "description": "User ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User blocked/unblocked successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User blocked"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/games": {
+            "get": {
+                "tags": [
+                    "Admin - Games"
+                ],
+                "summary": "Get all games for admin",
+                "operationId": "113497d56bcc3bc9e07b88b17057e91b",
+                "responses": {
+                    "200": {
+                        "description": "List of all games",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Mobile Legends"
+                                                    },
+                                                    "category": {
+                                                        "type": "string",
+                                                        "example": "MOBA"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "MOBA game populer"
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/image.jpg"
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Games"
+                ],
+                "summary": "Create new game",
+                "operationId": "6665bc27602de5ae2f2cc9e9431fef1d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Mobile Legends"
+                                    },
+                                    "category": {
+                                        "type": "string",
+                                        "example": "MOBA"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "MOBA game populer"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "example": "https://example.com/image.jpg"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Game created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/games/{id}": {
+            "put": {
+                "tags": [
+                    "Admin - Games"
+                ],
+                "summary": "Update game",
+                "operationId": "e8f7a714868f482f6b1a5a64feb8d73c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Game updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Games"
+                ],
+                "summary": "Delete game",
+                "operationId": "1ec5823f5631feae31a4c5f492b43e37",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Game deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mobile/products": {
+            "get": {
+                "tags": [
+                    "Mobile API"
+                ],
+                "summary": "Get all products for mobile app",
+                "operationId": "d59fe4b79cedae61a8b02cea67aa62fa",
+                "responses": {
+                    "200": {
+                        "description": "List of all products for mobile",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "example": "1_1"
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Mobile Legends - 86 Diamonds"
+                                                    },
+                                                    "category": {
+                                                        "type": "string",
+                                                        "example": "Game"
+                                                    },
+                                                    "sellPrice": {
+                                                        "type": "number",
+                                                        "example": 22000
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "active"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/products": {
+            "get": {
+                "tags": [
+                    "Admin - Products"
+                ],
+                "summary": "Get all products for admin",
+                "operationId": "9058305dfe0377e6cf7c5253ed664401",
+                "responses": {
+                    "200": {
+                        "description": "List of all products",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "example": "1_1"
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Mobile Legends - 86 Diamonds"
+                                                    },
+                                                    "category": {
+                                                        "type": "string",
+                                                        "example": "Game"
+                                                    },
+                                                    "provider": {
+                                                        "type": "string",
+                                                        "example": "Digiflazz"
+                                                    },
+                                                    "buyPrice": {
+                                                        "type": "number",
+                                                        "example": 20000
+                                                    },
+                                                    "sellPrice": {
+                                                        "type": "number",
+                                                        "example": 22000
+                                                    },
+                                                    "profit": {
+                                                        "type": "number",
+                                                        "example": 2000
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "active"
+                                                    },
+                                                    "stock": {
+                                                        "type": "string",
+                                                        "example": "unlimited"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin - Products"
+                ],
+                "summary": "Create new product",
+                "operationId": "e78a4cd5a8e47d96daa7a5a7a13d3e30",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "game_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "product_name": {
+                                        "type": "string",
+                                        "example": "86 Diamonds"
+                                    },
+                                    "amount": {
+                                        "type": "number",
+                                        "example": 86
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "example": 22000
+                                    },
+                                    "base_price": {
+                                        "type": "number",
+                                        "example": 20000
+                                    },
+                                    "sku_code": {
+                                        "type": "string",
+                                        "example": "ML_86"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Product created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/products/{id}": {
+            "get": {
+                "tags": [
+                    "Admin - Products"
+                ],
+                "summary": "Get product details",
+                "operationId": "e645351e64571486935b1fbb5743d6b8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product details"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin - Products"
+                ],
+                "summary": "Update product",
+                "operationId": "78c34d6552e97335a6594ceaf054d60f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "product_name": {
+                                        "type": "string",
+                                        "example": "86 Diamonds"
+                                    },
+                                    "amount": {
+                                        "type": "number",
+                                        "example": 86
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "example": 22000
+                                    },
+                                    "base_price": {
+                                        "type": "number",
+                                        "example": 20000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Product updated successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin - Products"
+                ],
+                "summary": "Delete product",
+                "operationId": "14131d6e77dc1537765eaa35848d3941",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product deleted successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/products/sync": {
+            "post": {
+                "tags": [
+                    "Admin - Product Sync"
+                ],
+                "summary": "Sync products from Digiflazz API",
+                "operationId": "8fad0f7019fb3bc18d3fc06ed36a9920",
+                "responses": {
+                    "200": {
+                        "description": "Sync completed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sinkronisasi produk berhasil"
+                                        },
+                                        "output": {
+                                            "type": "string",
+                                            "example": "Starting Digiflazz products synchronization..."
+                                        },
+                                        "last_sync": {
+                                            "type": "string",
+                                            "example": "2024-01-01 12:00:00"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Sync already running or failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Sinkronisasi sedang berjalan, silakan tunggu..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/products/sync-status": {
+            "get": {
+                "tags": [
+                    "Admin - Product Sync"
+                ],
+                "summary": "Get synchronization status",
+                "operationId": "a909aa3b2e3732061ca61e2cdf5ec5c4",
+                "responses": {
+                    "200": {
+                        "description": "Sync status retrieved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "last_sync": {
+                                                    "type": "string",
+                                                    "example": "2024-01-01 12:00:00"
+                                                },
+                                                "is_running": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "total_products": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "digiflazz_products": {
+                                                    "type": "integer",
+                                                    "example": 11
+                                                },
+                                                "last_sync_formatted": {
+                                                    "type": "string",
+                                                    "example": "2 hours ago"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register new user",
+                "operationId": "08136088c4862c313b35d6518bab8d3a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "081234567890"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "User registered successfully"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abc123..."
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john@example.com"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "customer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login user",
+                "operationId": "99d66635c4992aeaa6aa44ff653d0563",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abc123..."
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john@example.com"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "customer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid credentials"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout user",
+                "operationId": "6abf3b64a4bc7838d56346f05a5153af",
+                "responses": {
+                    "200": {
+                        "description": "Logout successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logout successful"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/user": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get authenticated user",
+                "operationId": "2baab1eeb5fd49516237a38da22e7a07",
+                "responses": {
+                    "200": {
+                        "description": "User data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john@example.com"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "customer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/games": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Get all games with products",
+                "operationId": "1b82c5b15cc012fcd36f174b084d6c41",
+                "responses": {
+                    "200": {
+                        "description": "List of games with products",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Mobile Legends"
+                                                    },
+                                                    "category": {
+                                                        "type": "string",
+                                                        "example": "MOBA"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "MOBA game populer"
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "example": "https://example.com/image.jpg"
+                                                    },
+                                                    "products": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "product_name": {
+                                                                    "type": "string",
+                                                                    "example": "86 Diamonds"
+                                                                },
+                                                                "price": {
+                                                                    "type": "string",
+                                                                    "example": "22000.00"
+                                                                },
+                                                                "sku_code": {
+                                                                    "type": "string",
+                                                                    "example": "ML_86"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/mobile/games/{gameId}/products": {
+            "get": {
+                "tags": [
+                    "Mobile API"
+                ],
+                "summary": "Get products by game ID",
+                "operationId": "ea9eeba5f927eb730267809da0e20daa",
+                "parameters": [
+                    {
+                        "name": "gameId",
+                        "in": "path",
+                        "description": "Game ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Game products retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "game": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Mobile Legends"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "products": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "86 Diamonds"
+                                                            },
+                                                            "price": {
+                                                                "type": "string",
+                                                                "example": "22000.00"
+                                                            },
+                                                            "sku_code": {
+                                                                "type": "string",
+                                                                "example": "ML_86"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders": {
+            "get": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get user orders",
+                "operationId": "1e17b0111e2ac044e9d69b17e2c6d5a4",
+                "responses": {
+                    "200": {
+                        "description": "List of user orders",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "game_name": {
+                                                        "type": "string",
+                                                        "example": "Mobile Legends"
+                                                    },
+                                                    "product_name": {
+                                                        "type": "string",
+                                                        "example": "86 Diamonds"
+                                                    },
+                                                    "player_id": {
+                                                        "type": "string",
+                                                        "example": "123456789"
+                                                    },
+                                                    "total_price": {
+                                                        "type": "string",
+                                                        "example": "22000.00"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "success"
+                                                    },
+                                                    "payment_method": {
+                                                        "type": "string",
+                                                        "example": "QRIS"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "example": "2025-11-21T10:00:00.000000Z"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Create new order",
+                "operationId": "6fdc923406aa75e20c6bdd257842df11",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "product_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "player_id": {
+                                        "type": "string",
+                                        "example": "123456789"
+                                    },
+                                    "server_id": {
+                                        "type": "string",
+                                        "example": "1234"
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "example": "QRIS"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Order created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Order created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "waiting_payment"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/customer/profile": {
+            "get": {
+                "tags": [
+                    "Customer - Profile"
+                ],
+                "summary": "Get customer profile",
+                "operationId": "8b507affe0fcad8fb9934b84dcc8d113",
+                "responses": {
+                    "200": {
+                        "description": "Profile retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "John Doe"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "john@example.com"
+                                        },
+                                        "phone": {
+                                            "type": "string",
+                                            "example": "081234567890"
+                                        },
+                                        "balance": {
+                                            "type": "number",
+                                            "example": 50000
+                                        },
+                                        "level": {
+                                            "type": "string",
+                                            "example": "Bronze"
+                                        },
+                                        "total_orders": {
+                                            "type": "integer",
+                                            "example": 15
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "example": "2024-01-15T08:30:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Customer - Profile"
+                ],
+                "summary": "Update customer profile",
+                "operationId": "a1adb820728515a51c47bdfa63a3345a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "081234567890"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Profile updated successfully"
+                                        },
+                                        "user": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/customer/topup-balance": {
+            "post": {
+                "tags": [
+                    "Customer - Profile"
+                ],
+                "summary": "Top up customer balance",
+                "operationId": "2161fc8f726338233c6acf7e7d79a63c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "amount",
+                                    "payment_method"
+                                ],
+                                "properties": {
+                                    "amount": {
+                                        "type": "number",
+                                        "example": 100000
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "example": "qris"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Top up request created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "topup_id": {
+                                            "type": "string",
+                                            "example": "TOP-20241201-001"
+                                        },
+                                        "amount": {
+                                            "type": "number",
+                                            "example": 100000
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "waiting_payment"
+                                        },
+                                        "payment_url": {
+                                            "type": "string",
+                                            "example": "https://payment.example.com/topup/123"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/digiflazz/balance": {
+            "get": {
+                "tags": [
+                    "Digiflazz"
+                ],
+                "summary": "Get Digiflazz balance",
+                "operationId": "37f5a09dfbc0daa605c8bd8cdf4f130e",
+                "responses": {
+                    "200": {
+                        "description": "Balance retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "balance": {
+                                            "type": "number",
+                                            "example": 100000
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "example": "active"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/digiflazz/price-list": {
+            "get": {
+                "tags": [
+                    "Digiflazz"
+                ],
+                "summary": "Get Digiflazz price list",
+                "operationId": "b329044644ee4c7df019913e6b749274",
+                "responses": {
+                    "200": {
+                        "description": "Price list retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "product_name": {
+                                                                "type": "string",
+                                                                "example": "Mobile Legends 86 Diamond"
+                                                            },
+                                                            "category": {
+                                                                "type": "string",
+                                                                "example": "Games"
+                                                            },
+                                                            "brand": {
+                                                                "type": "string",
+                                                                "example": "MOBILE LEGENDS"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "example": 20000
+                                                            },
+                                                            "buyer_sku_code": {
+                                                                "type": "string",
+                                                                "example": "ML86"
+                                                            },
+                                                            "buyer_product_status": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            },
+                                                            "stock": {
+                                                                "type": "number",
+                                                                "example": 999999
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/digiflazz/test": {
+            "post": {
+                "tags": [
+                    "Digiflazz"
+                ],
+                "summary": "Test Digiflazz connection",
+                "operationId": "0f88f0b1809cd3ad54455da8ebb786dd",
+                "responses": {
+                    "200": {
+                        "description": "Connection test result",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Connection test using provider settings"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "username": {
+                                                    "type": "string",
+                                                    "example": "your_username"
+                                                },
+                                                "api_key": {
+                                                    "type": "string",
+                                                    "example": "dev-fc9c19..."
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "configured"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/products": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get all products",
+                "operationId": "d97d1c3727cbac49708b85f7d11f7d58",
+                "responses": {
+                    "200": {
+                        "description": "List of products",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "sku_code": {
+                                                        "type": "string",
+                                                        "example": "ML86"
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "86 Diamond"
+                                                    },
+                                                    "category": {
+                                                        "type": "string",
+                                                        "example": "Game"
+                                                    },
+                                                    "provider": {
+                                                        "type": "string",
+                                                        "example": "digiflazz"
+                                                    },
+                                                    "game": {
+                                                        "type": "string",
+                                                        "example": "Mobile Legends"
+                                                    },
+                                                    "amount": {
+                                                        "type": "integer",
+                                                        "example": 86
+                                                    },
+                                                    "base_price": {
+                                                        "type": "number",
+                                                        "example": 20000
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "example": 22000
+                                                    },
+                                                    "profit": {
+                                                        "type": "number",
+                                                        "example": 2000
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "stock": {
+                                                        "type": "integer",
+                                                        "example": -1
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "digiflazz_count": {
+                                                    "type": "integer",
+                                                    "example": 11
+                                                },
+                                                "local_count": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/products/{id}": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "Get product by ID",
+                "operationId": "c87fb2e4d617e7b36c712cad358acdb8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Product ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "sku_code": {
+                                                    "type": "string",
+                                                    "example": "ML86"
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "86 Diamond"
+                                                },
+                                                "category": {
+                                                    "type": "string",
+                                                    "example": "Game"
+                                                },
+                                                "provider": {
+                                                    "type": "string",
+                                                    "example": "digiflazz"
+                                                },
+                                                "game": {
+                                                    "type": "object"
+                                                },
+                                                "amount": {
+                                                    "type": "integer",
+                                                    "example": 86
+                                                },
+                                                "base_price": {
+                                                    "type": "number",
+                                                    "example": 20000
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "example": 22000
+                                                },
+                                                "profit": {
+                                                    "type": "number",
+                                                    "example": 2000
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "stock": {
+                                                    "type": "integer",
+                                                    "example": -1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found"
+                    }
+                }
+            }
+        },
+        "/api/providers": {
+            "get": {
+                "tags": [
+                    "Providers"
+                ],
+                "summary": "Get all providers",
+                "operationId": "d99e139f235d5222c74789c37512fc95",
+                "responses": {
+                    "200": {
+                        "description": "Providers retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "providers": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Digiflazz"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "inactive"
+                                                    },
+                                                    "balance": {
+                                                        "type": "number",
+                                                        "example": 0
+                                                    },
+                                                    "username": {
+                                                        "type": "string",
+                                                        "example": ""
+                                                    },
+                                                    "api_key": {
+                                                        "type": "string",
+                                                        "example": ""
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register new user",
+                "operationId": "55230db9c8ca6a8ec2f8587ec924a953",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Registration successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Registration successful"
+                                        },
+                                        "user": {
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login user",
+                "operationId": "ec9c379d2a959de66404708dd4a9322d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "user": {
+                                            "type": "object"
+                                        },
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout user",
+                "operationId": "cc14526f9abd470d63047b1c05aef0c3",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/me": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Get current user info",
+                "operationId": "7f99448397f99ea34ee8b73f2b2375c5",
+                "responses": {
+                    "200": {
+                        "description": "User information",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        },
+                                        "role": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/customer/games": {
+            "get": {
+                "tags": [
+                    "Customer - Games"
+                ],
+                "summary": "Get all games with products",
+                "operationId": "7a7a160a474d46e6866169a5f7a68493",
+                "responses": {
+                    "200": {
+                        "description": "List of games with products",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "name": {
+                                                "type": "string"
+                                            },
+                                            "slug": {
+                                                "type": "string"
+                                            },
+                                            "icon_url": {
+                                                "type": "string"
+                                            },
+                                            "topup_products": {
+                                                "type": "array",
+                                                "items": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer"
+                                                        },
+                                                        "product_name": {
+                                                            "type": "string"
+                                                        },
+                                                        "amount": {
+                                                            "type": "integer"
+                                                        },
+                                                        "price": {
+                                                            "type": "number"
+                                                        },
+                                                        "base_price": {
+                                                            "type": "number"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/customer/games/{id}": {
+            "get": {
+                "tags": [
+                    "Customer - Games"
+                ],
+                "summary": "Get game detail with products",
+                "operationId": "00554a07195e42ed6c06eab639e62fd5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Game detail with products"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/customer/orders": {
+            "get": {
+                "tags": [
+                    "Customer - Orders"
+                ],
+                "summary": "Get customer orders history",
+                "operationId": "14d467cbdcf866ba36f4e3b3b5eb25c7",
+                "responses": {
+                    "200": {
+                        "description": "List of customer orders"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Customer - Orders"
+                ],
+                "summary": "Create new order",
+                "operationId": "53808a2d070c763c038463db11bfcc5a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_id",
+                                    "player_id",
+                                    "payment_method"
+                                ],
+                                "properties": {
+                                    "product_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "player_id": {
+                                        "type": "string",
+                                        "example": "123456789"
+                                    },
+                                    "server_id": {
+                                        "type": "string",
+                                        "example": "2001"
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "example": "BCA"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Order created successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/customer/orders/{id}/payment-proof": {
+            "post": {
+                "tags": [
+                    "Customer - Orders"
+                ],
+                "summary": "Upload payment proof",
+                "operationId": "fd4730b61d08ce9a4a596facda3d6964",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "payment_proof": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Payment proof uploaded successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Laravel Sanctum token authentication",
+                "name": "Authorization",
+                "in": "header",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Admin - Product Sync",
+            "description": "Product synchronization with Digiflazz"
+        },
+        {
+            "name": "Mobile API",
+            "description": "Mobile application endpoints"
+        },
+        {
+            "name": "Customer - Profile",
+            "description": "Customer profile management"
+        },
+        {
+            "name": "Digiflazz",
+            "description": "Digiflazz API integration"
+        },
+        {
+            "name": "Products",
+            "description": "Product management endpoints"
+        },
+        {
+            "name": "Providers",
+            "description": "Provider management endpoints"
+        },
+        {
+            "name": "Authentication",
+            "description": "User authentication endpoints"
+        },
+        {
+            "name": "Games",
+            "description": "Game catalog endpoints"
+        },
+        {
+            "name": "Orders",
+            "description": "Order management endpoints"
+        },
+        {
+            "name": "Admin - Products",
+            "description": "Admin product management"
+        },
+        {
+            "name": "Admin - Dashboard",
+            "description": "Admin - Dashboard"
+        },
+        {
+            "name": "Admin - Orders",
+            "description": "Admin - Orders"
+        },
+        {
+            "name": "Admin - Customers",
+            "description": "Admin - Customers"
+        },
+        {
+            "name": "Admin - Games",
+            "description": "Admin - Games"
+        },
+        {
+            "name": "Customer - Games",
+            "description": "Customer - Games"
+        },
+        {
+            "name": "Customer - Orders",
+            "description": "Customer - Orders"
+        }
+    ],
+    "security": [
+        {
+            "sanctum": []
+        }
+    ]
+}

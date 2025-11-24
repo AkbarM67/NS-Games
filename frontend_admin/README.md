@@ -1,33 +1,39 @@
 # Admin Dashboard
 
-React admin panel untuk NS Games Topup platform.
+React-based admin dashboard for NS Topup Games Platform.
 
-## Setup
+## Features
+
+- 📊 Real-time dashboard analytics
+- 👥 User management with avatar support
+- 🎮 Product catalog management
+- 💰 Transaction monitoring
+- ⚙️ System configuration
+- 🔔 Real-time activity logs
+- 🛡️ Admin user management
+
+## Tech Stack
+
+- React 18 with TypeScript
+- Tailwind CSS for styling
+- Vite for build tooling
+- Axios for API communication
+- Lucide React for icons
+- shadcn/ui components
+
+## Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Configuration
+## Build
 
-API endpoint: `http://localhost/NS-topupgames/ns-topup/public/api`
+```bash
+npm run build
+```
 
-## Features
+## Environment
 
-- Dashboard overview
-- User management
-- Transaction management
-- Settings configuration
-- Profile management
-
-## Authentication
-
-Admin-only access with Laravel backend integration.
-
-## Tech Stack
-
-- React + TypeScript
-- Tailwind CSS
-- Vite
-- Axios
+The admin dashboard connects to the Laravel backend API at `http://127.0.0.1:8000/api`

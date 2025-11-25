@@ -82,15 +82,6 @@ Configure via admin dashboard settings.
 - **Customer**: http://localhost:3001
 - **Documentation**: http://127.0.0.1:8000/api-docs.html
 
-## Default Credentials
-
-**Admin**
-- Email: admin@example.com
-- Password: password
-
-**Customer**
-- Email: customer@example.com  
-- Password: password
 
 ## Features
 

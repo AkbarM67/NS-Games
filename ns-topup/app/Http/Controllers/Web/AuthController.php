@@ -42,12 +42,12 @@ class AuthController extends Controller
             // Strict role-based redirect
             if ($user->role === 'admin') {
                 // Only admin role can access admin panel
-                $url = 'http://localhost:3000/?token=' . $token . '&user=' . urlencode(json_encode($user));
-                return response()->redirectTo($url);
+                $url = 'http://localhost:3000/?token=' . urlencode($token) . '&user=' . urlencode(json_encode($user));
+                return redirect()->away($url);
             } elseif ($user->role === 'customer') {
                 // Only customer role can access customer panel
-                $url = 'http://localhost:3003/?token=' . $token . '&user=' . urlencode(json_encode($user));
-                return response()->redirectTo($url);
+                $url = 'http://localhost:3001/?token=' . urlencode($token) . '&user=' . urlencode(json_encode($user));
+                return redirect()->away($url);
             } else {
                 // Fallback - logout if role is invalid
                 Auth::logout();
@@ -93,18 +93,29 @@ class AuthController extends Controller
         $token = $user->createToken('auth-token')->plainTextToken;
         
         // New users are customers by default, redirect to customer panel
-        $url = 'http://localhost:3003/?token=' . $token . '&user=' . urlencode(json_encode($user));
-        return response()->redirectTo($url);
+        $url = 'http://localhost:3001/?token=' . urlencode($token) . '&user=' . urlencode(json_encode($user));
+        return redirect()->away($url);
     }
 
     public function logout(Request $request)
     {
+        // Revoke all tokens for the user
+        if (Auth::check()) {
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            $user->tokens()->delete();
+        }
+        
         Auth::logout();
-
+        
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
-        return redirect('/');
+        
+        // Clear all cookies
+        $response = redirect('/');
+        $response->withCookie(cookie()->forget('laravel_session'));
+        
+        return $response;
     }
 
 

@@ -5,6 +5,8 @@ import { ProductCatalog } from "./components/user/ProductCatalog";
 import { OrderPage } from "./components/user/OrderPage";
 import { TransactionHistory } from "./components/user/TransactionHistory";
 import { UserProfile } from "./components/user/UserProfile";
+import { RealTimeIndicator } from "./components/RealTimeIndicator";
+import { useAutoLogout } from "./hooks/useAutoLogout";
 
 
 export default function App() {
@@ -13,6 +15,9 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Auto logout after 2 hours of inactivity
+  useAutoLogout();
 
   useEffect(() => {
     console.log('Frontend-Customer: Starting auth check...');
@@ -151,6 +156,9 @@ export default function App() {
       <main className="pb-8">
         {renderPage()}
       </main>
+      
+      {/* Real-time Connection Indicator */}
+      <RealTimeIndicator />
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">

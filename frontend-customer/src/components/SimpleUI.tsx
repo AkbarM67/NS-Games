@@ -106,16 +106,19 @@ export const SelectValue = ({ placeholder }: { placeholder?: string }) => (
   <span className="text-gray-500">{placeholder}</span>
 );
 
-export const Tabs = ({ children, defaultValue }: { children: React.ReactNode; defaultValue?: string }) => (
-  <div>{children}</div>
+export const Tabs = ({ children, value, onValueChange }: { children: React.ReactNode; value?: string; onValueChange?: (value: string) => void }) => (
+  <div data-value={value}>{children}</div>
 );
 
 export const TabsList = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div className={`inline-flex h-10 items-center justify-center rounded-md bg-gray-100 p-1 ${className}`}>{children}</div>
 );
 
-export const TabsTrigger = ({ children, value, className = "" }: { children: React.ReactNode; value: string; className?: string }) => (
-  <button className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all hover:bg-white hover:shadow-sm ${className}`}>
+export const TabsTrigger = ({ children, value, className = "", onClick }: { children: React.ReactNode; value: string; className?: string; onClick?: () => void }) => (
+  <button 
+    onClick={onClick}
+    className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium transition-all hover:bg-white hover:shadow-sm ${className}`}
+  >
     {children}
   </button>
 );

@@ -10,6 +10,8 @@ import { MarketingPromo } from "./components/MarketingPromo";
 import { SettingsPage } from "./components/SettingsPage";
 import { AdminProfile } from "./components/AdminProfile";
 import { AnnouncementManagement } from "./components/AnnouncementManagement";
+import { BalanceTopups } from "./components/BalanceTopups";
+import { useAutoLogout } from "./hooks/useAutoLogout";
 import { Toaster } from "sonner";
 
 const LOGIN_URL = 'http://127.0.0.1:8000/login';
@@ -18,6 +20,9 @@ export default function App() {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [user, setUser] = useState(null);
   const [headerRefreshTrigger, setHeaderRefreshTrigger] = useState(0);
+  
+  // Auto logout after 2 hours of inactivity
+  useAutoLogout();
 
   useEffect(() => {
     // Check URL parameters for token
@@ -97,6 +102,8 @@ export default function App() {
         return <MarketingPromo />;
       case "announcements":
         return <AnnouncementManagement />;
+      case "balance-topups":
+        return <BalanceTopups />;
       case "settings":
         return <SettingsPage />;
       case "profile":

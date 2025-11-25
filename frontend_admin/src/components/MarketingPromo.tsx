@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "../lib/api";
+import { useRealTime } from "../hooks/useRealTime";
 import { Plus, Ticket, Gift, Percent, Users, Eye, Edit, Trash2, Copy } from "lucide-react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { 
@@ -34,103 +36,39 @@ interface Promo {
 export function MarketingPromo() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedPromo, setSelectedPromo] = useState<Promo | null>(null);
+  const [promos, setPromos] = useState<Promo[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data promo
-  const promos: Promo[] = [
-    {
-      id: "PROMO001",
-      name: "Diskon 10% All Products",
-      code: "TOPUP10",
-      type: "discount",
-      value: 10,
-      valueType: "percentage",
-      minTransaction: 50000,
-      maxDiscount: 20000,
-      quota: 1000,
-      used: 450,
-      validFrom: "2025-01-01",
-      validUntil: "2025-01-31",
-      status: "active",
-      targetUsers: "all"
-    },
-    {
-      id: "PROMO002",
-      name: "Cashback Rp 5.000",
-      code: "CASHBACK5K",
-      type: "cashback",
-      value: 5000,
-      valueType: "fixed",
-      minTransaction: 100000,
-      quota: 500,
-      used: 320,
-      validFrom: "2025-01-15",
-      validUntil: "2025-02-15",
-      status: "active",
-      targetUsers: "all"
-    },
-    {
-      id: "PROMO003",
-      name: "Welcome Bonus New Member",
-      code: "WELCOME2025",
-      type: "bonus",
-      value: 10000,
-      valueType: "fixed",
-      minTransaction: 0,
-      quota: 10000,
-      used: 3250,
-      validFrom: "2025-01-01",
-      validUntil: "2025-12-31",
-      status: "active",
-      targetUsers: "new"
-    },
-    {
-      id: "PROMO004",
-      name: "Flash Sale 20%",
-      code: "FLASH20",
-      type: "discount",
-      value: 20,
-      valueType: "percentage",
-      minTransaction: 200000,
-      maxDiscount: 50000,
-      quota: 100,
-      used: 100,
-      validFrom: "2025-01-10",
-      validUntil: "2025-01-11",
-      status: "expired",
-      targetUsers: "all"
-    },
-    {
-      id: "PROMO005",
-      name: "Diskon 15% Mobile Legends",
-      code: "ML15",
-      type: "discount",
-      value: 15,
-      valueType: "percentage",
-      minTransaction: 75000,
-      maxDiscount: 30000,
-      quota: 750,
-      used: 580,
-      validFrom: "2025-01-01",
-      validUntil: "2025-01-31",
-      status: "active",
-      targetUsers: "all"
-    },
-    {
-      id: "PROMO006",
-      name: "Cashback Weekend",
-      code: "WEEKEND10K",
-      type: "cashback",
-      value: 10000,
-      valueType: "fixed",
-      minTransaction: 150000,
-      quota: 200,
-      used: 95,
-      validFrom: "2025-01-25",
-      validUntil: "2025-01-26",
-      status: "active",
-      targetUsers: "all"
+  useRealTime({
+    onDashboardUpdate: () => {
+      loadPromos();
     }
-  ];
+  });
+
+  useEffect(() => {
+    loadPromos();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(loadPromos, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadPromos = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/admin/promos');
+      console.log('Load promos response:', response.data);
+      if (response.data.success) {
+        setPromos(response.data.data);
+        console.log('Promos set:', response.data.data);
+      }
+    } catch (error) {
+      console.error('Error loading promos:', error);
+      // No fallback data - show empty state
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getPromoTypeBadge = (type: string) => {
     switch (type) {
@@ -160,13 +98,61 @@ export function MarketingPromo() {
 
   // Statistics
   const activePromos = promos.filter(p => p.status === "active").length;
-  const totalQuota = promos.reduce((sum, p) => sum + p.quota, 0);
-  const totalUsed = promos.reduce((sum, p) => sum + p.used, 0);
-  const usageRate = ((totalUsed / totalQuota) * 100).toFixed(1);
+  const totalQuota = promos.reduce((sum, p) => sum + (p.quota || 0), 0);
+  const totalUsed = promos.reduce((sum, p) => sum + (p.used || 0), 0);
+  const usageRate = totalQuota > 0 ? ((totalUsed / totalQuota) * 100).toFixed(1) : '0';
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     // In real app, show toast notification
+  };
+
+  const handleEdit = (promo: Promo) => {
+    setSelectedPromo(promo);
+    setShowAddDialog(true);
+  };
+
+  const handleToggle = async (id: string) => {
+    try {
+      await api.patch(`/admin/promos/${id}/toggle`);
+      loadPromos();
+    } catch (error) {
+      console.error('Error toggling promo:', error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Yakin ingin menghapus promo ini?')) {
+      // Optimistically remove from UI first
+      setPromos(prev => prev.filter(promo => promo.id !== id));
+      
+      try {
+        await api.delete(`/admin/promos/${id}`);
+        // Success - data already removed from UI
+      } catch (error) {
+        console.error('Error deleting promo:', error);
+        // If API fails, reload to restore data
+        loadPromos();
+      }
+    }
+  };
+
+  const handleSave = async (formData: any) => {
+    console.log('Saving promo:', formData);
+    try {
+      let response;
+      if (selectedPromo) {
+        response = await api.put(`/admin/promos/${selectedPromo.id}`, formData);
+      } else {
+        response = await api.post('/admin/promos', formData);
+      }
+      console.log('Save response:', response.data);
+      loadPromos();
+      setShowAddDialog(false);
+      setSelectedPromo(null);
+    } catch (error) {
+      console.error('Error saving promo:', error);
+    }
   };
 
   return (
@@ -177,7 +163,10 @@ export function MarketingPromo() {
           <h1 className="text-2xl mb-1">Marketing & Promo</h1>
           <p className="text-gray-600">Kelola voucher, diskon, cashback, dan program marketing</p>
         </div>
-        <Button onClick={() => setShowAddDialog(true)} className="bg-blue-600 hover:bg-blue-700">
+        <Button onClick={() => {
+          setSelectedPromo(null);
+          setShowAddDialog(true);
+        }} className="bg-blue-600 hover:bg-blue-700">
           <Plus className="w-4 h-4 mr-2" />
           Buat Promo
         </Button>
@@ -212,7 +201,7 @@ export function MarketingPromo() {
             </div>
           </div>
           <p className="text-sm text-gray-600 mb-1">Total Digunakan</p>
-          <p className="text-3xl text-purple-600">{totalUsed.toLocaleString()}</p>
+          <p className="text-3xl text-purple-600">{(totalUsed || 0).toLocaleString()}</p>
         </Card>
 
         <Card className="p-6">
@@ -228,8 +217,21 @@ export function MarketingPromo() {
 
       {/* Promo Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {promos.map((promo) => {
-          const usagePercentage = (promo.used / promo.quota) * 100;
+        {loading ? (
+          Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="overflow-hidden animate-pulse">
+              <div className="p-6">
+                <div className="h-6 bg-gray-200 rounded mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-10 bg-gray-200 rounded mb-4"></div>
+                <div className="h-20 bg-gray-200 rounded mb-4"></div>
+                <div className="h-8 bg-gray-200 rounded"></div>
+              </div>
+            </Card>
+          ))
+        ) : (
+          promos.map((promo) => {
+          const usagePercentage = ((promo.used || 0) / (promo.quota || 1)) * 100;
           
           return (
             <Card key={promo.id} className="overflow-hidden">
@@ -261,19 +263,19 @@ export function MarketingPromo() {
                 <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-600 mb-1">Nilai Promo</p>
                   <p className="text-xl">
-                    {promo.valueType === "percentage" 
-                      ? `${promo.value}%` 
-                      : `Rp ${promo.value.toLocaleString()}`
+                    {(promo.value_type || promo.valueType) === "percentage" 
+                      ? `${promo.value || 0}%` 
+                      : `Rp ${(promo.value || 0).toLocaleString()}`
                     }
                   </p>
-                  {promo.minTransaction > 0 && (
+                  {(promo.minTransaction || 0) > 0 && (
                     <p className="text-xs text-gray-500 mt-1">
-                      Min. transaksi: Rp {promo.minTransaction.toLocaleString()}
+                      Min. transaksi: Rp {(promo.minTransaction || 0).toLocaleString()}
                     </p>
                   )}
                   {promo.maxDiscount && (
                     <p className="text-xs text-gray-500">
-                      Max. diskon: Rp {promo.maxDiscount.toLocaleString()}
+                      Max. diskon: Rp {(promo.maxDiscount || 0).toLocaleString()}
                     </p>
                   )}
                 </div>
@@ -282,7 +284,7 @@ export function MarketingPromo() {
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-gray-600">Kuota</span>
-                    <span>{promo.used} / {promo.quota}</span>
+                    <span>{promo.used || 0} / {promo.quota || 0}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
@@ -312,17 +314,34 @@ export function MarketingPromo() {
                     <Eye className="w-4 h-4 mr-2" />
                     Detail
                   </Button>
-                  <Button variant="outline" size="icon">
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={() => handleEdit(promo)}
+                  >
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" size="icon">
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={() => handleToggle(promo.id)}
+                    className={promo.status === 'active' ? 'text-green-600' : 'text-gray-600'}
+                  >
+                    {promo.status === 'active' ? '✓' : '✗'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon"
+                    onClick={() => handleDelete(promo.id)}
+                  >
                     <Trash2 className="w-4 h-4 text-red-600" />
                   </Button>
                 </div>
               </div>
             </Card>
           );
-        })}
+        })
+        )}
       </div>
 
       {/* Referral Program Section */}
@@ -361,94 +380,86 @@ export function MarketingPromo() {
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Buat Promo Baru</DialogTitle>
+            <DialogTitle>{selectedPromo ? 'Edit Promo' : 'Buat Promo Baru'}</DialogTitle>
+            <DialogDescription>
+              {selectedPromo ? 'Edit informasi promo yang sudah ada' : 'Buat promo baru untuk pelanggan'}
+            </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4">
+          <form className="space-y-4">
             <div>
               <Label>Nama Promo</Label>
-              <Input placeholder="Contoh: Flash Sale 20%" />
+              <Input name="name" placeholder="Contoh: Flash Sale 20%" defaultValue={selectedPromo?.name || ''} />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Kode Promo</Label>
-                <Input placeholder="FLASH20" />
+                <Input name="code" placeholder="FLASH20" defaultValue={selectedPromo?.code || ''} />
               </div>
               <div>
                 <Label>Tipe Promo</Label>
-                <Select defaultValue="discount">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="discount">Diskon</SelectItem>
-                    <SelectItem value="cashback">Cashback</SelectItem>
-                    <SelectItem value="bonus">Bonus</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select name="type" className="w-full p-2 border rounded" defaultValue={selectedPromo?.type || 'discount'} key={selectedPromo?.id || 'new'}>
+                  <option value="discount">Diskon</option>
+                  <option value="cashback">Cashback</option>
+                </select>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Nilai</Label>
-                <Input type="number" placeholder="10" />
+                <Input name="value" type="number" min="0" placeholder="10" defaultValue={selectedPromo?.value || ''} key={selectedPromo?.id || 'new'} />
               </div>
               <div>
                 <Label>Tipe Nilai</Label>
-                <Select defaultValue="percentage">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="percentage">Persentase (%)</SelectItem>
-                    <SelectItem value="fixed">Nominal (Rp)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select name="valueType" className="w-full p-2 border rounded" defaultValue={selectedPromo?.value_type || 'percentage'} key={selectedPromo?.id || 'new'}>
+                  <option value="percentage">Persentase (%)</option>
+                  <option value="fixed">Nominal (Rp)</option>
+                </select>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Min. Transaksi (Rp)</Label>
-                <Input type="number" placeholder="50000" />
+                <Input name="minTransaction" type="number" min="0" placeholder="50000" defaultValue={selectedPromo?.min_transaction || ''} key={selectedPromo?.id || 'new'} />
               </div>
               <div>
                 <Label>Max. Diskon (Rp)</Label>
-                <Input type="number" placeholder="20000" />
+                <Input name="maxDiscount" type="number" min="0" placeholder="20000" defaultValue={selectedPromo?.max_discount || ''} key={selectedPromo?.id || 'new'} />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Kuota</Label>
-                <Input type="number" placeholder="1000" />
+                <Input name="quota" type="number" min="1" placeholder="1000" defaultValue={selectedPromo?.quota || ''} key={selectedPromo?.id || 'new'} />
               </div>
               <div>
                 <Label>Target User</Label>
-                <Select defaultValue="all">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Semua User</SelectItem>
-                    <SelectItem value="new">User Baru</SelectItem>
-                    <SelectItem value="specific">User Khusus</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select name="targetUsers" className="w-full p-2 border rounded" defaultValue={selectedPromo?.target_users || 'all'} key={selectedPromo?.id || 'new'}>
+                  <option value="all">Semua User</option>
+                  <option value="new">User Baru</option>
+                  <option value="existing">User Existing</option>
+                </select>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Berlaku Dari</Label>
-                <Input type="date" />
+                <Input name="validFrom" type="date" defaultValue={selectedPromo?.valid_from ? new Date(selectedPromo.valid_from).toISOString().split('T')[0] : ''} />
               </div>
               <div>
                 <Label>Berlaku Sampai</Label>
-                <Input type="date" />
+                <Input name="validUntil" type="date" defaultValue={selectedPromo?.valid_until ? new Date(selectedPromo.valid_until).toISOString().split('T')[0] : ''} />
               </div>
+            </div>
+
+            <div>
+              <Label>Deskripsi</Label>
+              <Input name="description" placeholder="Deskripsi promo" defaultValue={selectedPromo?.description || ''} />
             </div>
 
             <div className="flex gap-3 pt-4">
@@ -460,21 +471,47 @@ export function MarketingPromo() {
                 Batal
               </Button>
               <Button 
-                onClick={() => setShowAddDialog(false)}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget.closest('form') as HTMLFormElement;
+                  if (form) {
+                    const formData = new FormData(form);
+                    const data = {
+                      name: formData.get('name'),
+                      code: formData.get('code'),
+                      type: formData.get('type'),
+                      value: Number(formData.get('value')),
+                      valueType: formData.get('valueType'),
+                      minTransaction: Number(formData.get('minTransaction')) || 0,
+                      maxDiscount: Number(formData.get('maxDiscount')) || null,
+                      quota: Number(formData.get('quota')),
+                      validFrom: formData.get('validFrom'),
+                      validUntil: formData.get('validUntil'),
+                      targetUsers: formData.get('targetUsers'),
+                      description: formData.get('description')
+                    };
+                    console.log('Form data:', data);
+                    handleSave(data);
+                  }
+                }}
                 className="flex-1 bg-blue-600 hover:bg-blue-700"
               >
-                Buat Promo
+                {selectedPromo ? 'Update Promo' : 'Buat Promo'}
               </Button>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
 
       {/* Promo Detail Dialog */}
-      <Dialog open={!!selectedPromo} onOpenChange={() => setSelectedPromo(null)}>
+      <Dialog open={!!selectedPromo && !showAddDialog} onOpenChange={() => setSelectedPromo(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Detail Promo</DialogTitle>
+            <DialogDescription>
+              Informasi lengkap tentang promo yang dipilih
+            </DialogDescription>
           </DialogHeader>
           
           {selectedPromo && (
@@ -495,29 +532,29 @@ export function MarketingPromo() {
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Nilai Promo</p>
                   <p className="text-lg">
-                    {selectedPromo.valueType === "percentage" 
-                      ? `${selectedPromo.value}%` 
-                      : `Rp ${selectedPromo.value.toLocaleString()}`
+                    {(selectedPromo.value_type || selectedPromo.valueType) === "percentage" 
+                      ? `${selectedPromo.value || 0}%` 
+                      : `Rp ${(selectedPromo.value || 0).toLocaleString()}`
                     }
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Min. Transaksi</p>
-                  <p>Rp {selectedPromo.minTransaction.toLocaleString()}</p>
+                  <p>Rp {(selectedPromo.min_transaction || selectedPromo.minTransaction || 0).toLocaleString()}</p>
                 </div>
                 {selectedPromo.maxDiscount && (
                   <div>
                     <p className="text-sm text-gray-600 mb-1">Max. Diskon</p>
-                    <p>Rp {selectedPromo.maxDiscount.toLocaleString()}</p>
+                    <p>Rp {(selectedPromo.max_discount || selectedPromo.maxDiscount || 0).toLocaleString()}</p>
                   </div>
                 )}
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Kuota</p>
-                  <p>{selectedPromo.quota.toLocaleString()}</p>
+                  <p>{(selectedPromo.quota || 0).toLocaleString()}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Telah Digunakan</p>
-                  <p>{selectedPromo.used.toLocaleString()}</p>
+                  <p>{(selectedPromo.used || 0).toLocaleString()}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Berlaku Dari</p>
@@ -534,9 +571,9 @@ export function MarketingPromo() {
                 <div className="w-full bg-gray-200 rounded-full h-4">
                   <div 
                     className="bg-blue-600 h-4 rounded-full flex items-center justify-center text-white text-xs"
-                    style={{ width: `${(selectedPromo.used / selectedPromo.quota) * 100}%` }}
+                    style={{ width: `${((selectedPromo.used || 0) / (selectedPromo.quota || 1)) * 100}%` }}
                   >
-                    {((selectedPromo.used / selectedPromo.quota) * 100).toFixed(0)}%
+                    {(((selectedPromo.used || 0) / (selectedPromo.quota || 1)) * 100).toFixed(0)}%
                   </div>
                 </div>
               </div>

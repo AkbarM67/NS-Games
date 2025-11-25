@@ -51,22 +51,60 @@ class GameController extends Controller
      */
     public function index()
     {
-        $games = Game::with(['products' => function($query) {
-            $query->orderBy('price');
-        }])->where('is_active', true)->get();
-
-        // Transform data to match frontend expectations
-        $games = $games->map(function($game) {
-            $game->products = $game->products->map(function($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->product_name,
-                    'price' => $product->price,
-                    'sku_code' => $product->sku_code
-                ];
-            });
-            return $game;
-        });
+        // Return mock data with consistent IDs and product images
+        $baseUrl = url('/assets/images/products');
+        $games = [
+            [
+                'id' => '1',
+                'name' => 'Mobile Legends',
+                'image' => $baseUrl . '/mobile-legends.svg',
+                'category' => 'MOBA',
+                'description' => 'Game MOBA terpopuler di Indonesia',
+                'rating' => 4.8,
+                'players' => 'Multiplayer',
+                'productCount' => 15
+            ],
+            [
+                'id' => '2', 
+                'name' => 'Free Fire',
+                'image' => $baseUrl . '/free-fire.svg',
+                'category' => 'Battle Royale',
+                'description' => 'Game battle royale dengan 50 pemain',
+                'rating' => 4.6,
+                'players' => 'Multiplayer',
+                'productCount' => 12
+            ],
+            [
+                'id' => '3',
+                'name' => 'PUBG Mobile', 
+                'image' => $baseUrl . '/pubg-mobile.svg',
+                'category' => 'Battle Royale',
+                'description' => 'Battle royale realistis dengan 100 pemain',
+                'rating' => 4.7,
+                'players' => 'Multiplayer',
+                'productCount' => 10
+            ],
+            [
+                'id' => '4',
+                'name' => 'Genshin Impact',
+                'image' => $baseUrl . '/genshin-impact.svg',
+                'category' => 'RPG', 
+                'description' => 'Open-world action RPG dengan grafis anime',
+                'rating' => 4.9,
+                'players' => 'Single/Multiplayer',
+                'productCount' => 8
+            ],
+            [
+                'id' => '5',
+                'name' => 'Valorant',
+                'image' => $baseUrl . '/valorant.svg',
+                'category' => 'FPS',
+                'description' => 'Tactical FPS dengan agent unik',
+                'rating' => 4.5,
+                'players' => 'Multiplayer', 
+                'productCount' => 6
+            ]
+        ];
 
         return response()->json([
             'success' => true,

@@ -7,7 +7,8 @@ import {
   Megaphone, 
   Settings,
   Wallet,
-  TrendingUp
+  TrendingUp,
+  CreditCard
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -42,6 +43,7 @@ export function Sidebar({ activeMenu, setActiveMenu }: SidebarProps) {
     { id: "transactions", label: "Transaksi", icon: Receipt },
     { id: "products", label: "Produk", icon: Package },
     { id: "users", label: "User/Member", icon: Users },
+    { id: "balance-topups", label: "Topup Saldo", icon: CreditCard },
     { id: "announcements", label: "Pengumuman", icon: Megaphone },
     { id: "reports", label: "Laporan", icon: FileText },
     { id: "marketing", label: "Marketing", icon: TrendingUp },

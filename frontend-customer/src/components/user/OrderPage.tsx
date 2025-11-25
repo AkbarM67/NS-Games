@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../../lib/api";
+import { useRealTime } from "../../hooks/useRealTime";
 import { ShoppingCart, Info, AlertCircle, CheckCircle, Copy, Smartphone } from "lucide-react";
 import { Card, Badge, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Dialog, DialogContent, DialogHeader, DialogTitle } from "../SimpleUI";
 
@@ -21,9 +22,41 @@ export function OrderPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Real-time WebSocket connection
+  useRealTime({
+    onProductUpdate: (updatedProduct) => {
+      console.log('Product updated:', updatedProduct);
+      // Refresh products when admin updates pricing
+      fetchProducts();
+    },
+    onOrderUpdate: (updatedOrder) => {
+      console.log('Order updated:', updatedOrder);
+      // Show notification when order status changes
+      if (updatedOrder.status === 'success') {
+        alert('Pesanan berhasil diproses!');
+      }
+    }
+  });
+
   useEffect(() => {
     fetchProducts();
     loadMidtransScript();
+    
+    // Load selected product from localStorage
+    const storedProduct = localStorage.getItem('selectedProduct');
+    if (storedProduct) {
+      try {
+        const product = JSON.parse(storedProduct);
+        setSelectedProduct(product.id);
+      } catch (error) {
+        console.error('Error parsing stored product:', error);
+      }
+    }
+    
+    // Auto-refresh products every 60 seconds
+    const interval = setInterval(fetchProducts, 60000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const loadMidtransScript = () => {
@@ -38,28 +71,31 @@ export function OrderPage() {
       console.log('OrderPage: Fetching products from /products');
       const response = await api.get('/products');
       console.log('OrderPage: API Response:', response.data);
-      if (response.data.success) {
+      
+      if (response.data.success && response.data.data.length > 0) {
         const allProducts = response.data.data.map((product: any) => {
           let category = "game";
-          if (product.category === "Pulsa") category = "pulsa";
-          else if (product.category === "E-Wallet") category = "ewallet";
+          if (product.category === "Pulsa" || product.name.toLowerCase().includes('pulsa')) category = "pulsa";
+          else if (product.category === "E-Wallet" || product.name.toLowerCase().includes('gopay') || product.name.toLowerCase().includes('ovo') || product.name.toLowerCase().includes('dana')) category = "ewallet";
           
           return {
-            id: product.id,
+            id: product.id.toString(),
             name: product.name,
-            price: product.sellPrice,
+            price: parseFloat(product.sellPrice || product.price || 0),
             category: category,
-            gameId: product.id.split('_')[0],
-            productId: product.id.split('_')[1]
+            gameId: product.gameId || product.id,
+            productId: product.id
           };
         });
         console.log('OrderPage: Converted products:', allProducts);
         setProducts(allProducts);
+      } else {
+        console.log('OrderPage: No products found, using fallback data');
+        setProducts(mockProducts);
       }
     } catch (error) {
       console.error('OrderPage: Error fetching products:', error);
-      console.error('OrderPage: Error details:', error.response?.data || error.message);
-      // Fallback ke data dummy
+      // Always use fallback data on error
       setProducts(mockProducts);
     } finally {
       setLoading(false);
@@ -90,7 +126,7 @@ export function OrderPage() {
   const selectedPaymentData = paymentMethods.find(p => p.id === paymentMethod);
 
   const calculateTotal = () => {
-    if (!selectedProductData) return 0;
+    if (!selectedProductData || !selectedProductData.price) return 0;
     
     let total = selectedProductData.price;
     
@@ -113,12 +149,11 @@ export function OrderPage() {
 
   const handleOrder = async () => {
     // Validasi
-    if (!selectedProduct) {
+    if (!selectedProductData) {
       alert("Pilih produk terlebih dahulu");
       return;
     }
     
-    const selectedProductData = products.find(p => p.id === selectedProduct);
     if (selectedProductData?.category === "game" && (!userId || !serverId)) {
       alert("Masukkan User ID dan Server ID");
       return;
@@ -136,7 +171,7 @@ export function OrderPage() {
     
     try {
       const orderData = {
-        product_id: selectedProduct,
+        product_id: selectedProductData.id,
         target_user_id: selectedProductData.category === "game" ? userId : phoneNumber,
         server_id: serverId || null,
         payment_method: paymentMethod,
@@ -197,41 +232,32 @@ export function OrderPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Side - Form */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Product Selection */}
-          <Card className="p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <ShoppingCart className="w-5 h-5 text-blue-600" />
+          {/* Selected Product Display */}
+          {selectedProductData && (
+            <Card className="p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <ShoppingCart className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3>Produk Dipilih</h3>
+                  <p className="text-sm text-gray-600">Produk yang akan dibeli</p>
+                </div>
               </div>
-              <div>
-                <h3>Pilih Produk</h3>
-                <p className="text-sm text-gray-600">Pilih produk yang ingin dibeli</p>
-              </div>
-            </div>
 
-            <div>
-              <Label>Produk</Label>
-              <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih produk..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <div className="px-2 py-1.5 text-xs text-gray-500">Game</div>
-                  {products.filter(p => p.category === "game").map((product) => (
-                    <SelectItem key={product.id} value={product.id}>
-                      {product.name} - Rp {product.price.toLocaleString()}
-                    </SelectItem>
-                  ))}
-                  <div className="px-2 py-1.5 text-xs text-gray-500 border-t mt-2 pt-2">Pulsa</div>
-                  {products.filter(p => p.category === "pulsa").map((product) => (
-                    <SelectItem key={product.id} value={product.id}>
-                      {product.name} - Rp {product.price.toLocaleString()}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </Card>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-blue-900">{selectedProductData.name}</h4>
+                    <p className="text-sm text-blue-700 capitalize">{selectedProductData.category}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-blue-600">Rp {selectedProductData.price.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
 
           {/* Game Account Info */}
           {selectedProductData?.category === "game" && (
@@ -431,7 +457,7 @@ export function OrderPage() {
                   <div className="flex justify-between items-center mb-4">
                     <span className="font-medium">Total Bayar</span>
                     <span className="text-2xl text-blue-600">
-                      Rp {calculateTotal().toLocaleString()}
+                      Rp {(calculateTotal() || 0).toLocaleString()}
                     </span>
                   </div>
 

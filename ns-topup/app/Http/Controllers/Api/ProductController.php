@@ -58,8 +58,10 @@ class ProductController extends Controller
             ->orderBy('provider', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
+        
+        $baseUrl = url('/assets/images/products');
 
-        $transformedProducts = $products->map(function($product) {
+        $transformedProducts = $products->map(function($product) use ($baseUrl) {
             return [
                 'id' => $product->id,
                 'sku_code' => $product->sku_code,
@@ -73,6 +75,7 @@ class ProductController extends Controller
                 'profit' => floatval($product->price - $product->base_price),
                 'is_active' => $product->is_active,
                 'stock' => $product->stock,
+                'image' => $this->getProductImage($product->product_name, $product->category, $baseUrl),
                 'last_sync' => $product->last_sync,
                 'created_at' => $product->created_at,
                 'updated_at' => $product->updated_at
@@ -88,6 +91,67 @@ class ProductController extends Controller
                 'local_count' => $products->where('provider', 'local')->count()
             ]
         ]);
+    }
+    
+    private function getProductImage($productName, $category, $baseUrl)
+    {
+        $productName = strtolower($productName);
+        
+        // Game products
+        if (str_contains($productName, 'mobile legends') || str_contains($productName, 'ml')) {
+            return $baseUrl . '/mobile-legends.svg';
+        }
+        if (str_contains($productName, 'free fire') || str_contains($productName, 'ff')) {
+            return $baseUrl . '/free-fire.svg';
+        }
+        if (str_contains($productName, 'pubg')) {
+            return $baseUrl . '/pubg-mobile.svg';
+        }
+        if (str_contains($productName, 'genshin')) {
+            return $baseUrl . '/genshin-impact.svg';
+        }
+        if (str_contains($productName, 'valorant')) {
+            return $baseUrl . '/valorant.svg';
+        }
+        
+        // E-wallet products
+        if (str_contains($productName, 'dana')) {
+            return $baseUrl . '/dana.svg';
+        }
+        if (str_contains($productName, 'ovo')) {
+            return $baseUrl . '/ovo.svg';
+        }
+        if (str_contains($productName, 'gopay') || str_contains($productName, 'go-pay')) {
+            return $baseUrl . '/gopay.svg';
+        }
+        
+        // Pulsa products - specific providers
+        if (str_contains($productName, 'telkomsel')) {
+            return $baseUrl . '/telkomsel.svg';
+        }
+        if (str_contains($productName, 'indosat')) {
+            return $baseUrl . '/indosat.svg';
+        }
+        if (str_contains($productName, 'xl')) {
+            return $baseUrl . '/xl.svg';
+        }
+        if (str_contains($productName, 'pulsa') || str_contains($productName, 'tri') || str_contains($productName, 'smartfren')) {
+            return $baseUrl . '/pulsa.svg';
+        }
+        
+        // Default based on category
+        switch (strtolower($category)) {
+            case 'game':
+                return $baseUrl . '/mobile-legends.svg';
+            case 'pulsa':
+            case 'pulsa & data':
+                return $baseUrl . '/pulsa.svg';
+            case 'ewallet':
+            case 'e-wallet':
+                return $baseUrl . '/dana.svg';
+            default:
+                return $baseUrl . '/mobile-legends.svg';
+        }
     }
 
     /**
@@ -134,6 +198,7 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::with('game')->findOrFail($id);
+        $baseUrl = url('/assets/images/products');
         
         return response()->json([
             'success' => true,
@@ -150,6 +215,7 @@ class ProductController extends Controller
                 'profit' => floatval($product->price - $product->base_price),
                 'is_active' => $product->is_active,
                 'stock' => $product->stock,
+                'image' => $this->getProductImage($product->product_name, $product->category, $baseUrl),
                 'last_sync' => $product->last_sync,
                 'created_at' => $product->created_at,
                 'updated_at' => $product->updated_at

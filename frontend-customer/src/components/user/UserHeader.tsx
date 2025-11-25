@@ -1,6 +1,8 @@
 import { ShoppingCart, User, Menu, X, Wallet, Clock, LogIn, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Badge, Button } from "../SimpleUI";
+import api from "../../lib/api";
+import { NotificationBell } from "./NotificationBell";
 
 interface UserHeaderProps {
   activePage: string;
@@ -19,10 +21,12 @@ export function UserHeader({ activePage, setActivePage, isLoggedIn, user, onLogo
   const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
-    fetch('http://localhost/NS-topupgames/ns-topup/public/api/settings')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.data && data.data.logo) {
+    api.get('/settings')
+      .then(res => {
+        const data = res.data;
+        if (data.success && data.data && data.data.logo_url) {
+          setLogo(data.data.logo_url);
+        } else if (data.data && data.data.logo) {
           setLogo(data.data.logo);
         } else if (data.general && data.general.logo) {
           setLogo(data.general.logo);
@@ -33,16 +37,9 @@ export function UserHeader({ activePage, setActivePage, isLoggedIn, user, onLogo
       });
 
     if (isLoggedIn && user) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        fetch('http://localhost:8000/api/user/profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        })
-        .then(res => res.json())
-        .then(data => {
+      api.get('/user/profile')
+        .then(res => {
+          const data = res.data;
           if (data.success && data.data) {
             setBalance(data.data.balance || 0);
             setUserName(data.data.name || "");
@@ -51,7 +48,6 @@ export function UserHeader({ activePage, setActivePage, isLoggedIn, user, onLogo
         .catch(error => {
           console.error('Error fetching balance:', error);
         });
-      }
     }
   }, [isLoggedIn, user]);
 
@@ -64,16 +60,9 @@ export function UserHeader({ activePage, setActivePage, isLoggedIn, user, onLogo
 
   const fetchUserProfile = () => {
     if (isLoggedIn && user) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        fetch('http://localhost:8000/api/user/profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        })
-        .then(res => res.json())
-        .then(data => {
+      api.get('/user/profile')
+        .then(res => {
+          const data = res.data;
           if (data.success && data.data) {
             setBalance(data.data.balance || 0);
             setUserName(data.data.name || "");
@@ -82,7 +71,6 @@ export function UserHeader({ activePage, setActivePage, isLoggedIn, user, onLogo
         .catch(error => {
           console.error('Error fetching profile:', error);
         });
-      }
     }
   };
 
@@ -105,7 +93,7 @@ export function UserHeader({ activePage, setActivePage, isLoggedIn, user, onLogo
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden border">
               {logo ? (
                 <img 
-                  src={`http://localhost/NS-topupgames/ns-topup/public${logo}`} 
+                  src={logo.startsWith('http') ? logo : `http://127.0.0.1:8000${logo}`} 
                   alt="Logo" 
                   className="w-full h-full object-contain"
                   onError={() => setLogo(null)}
@@ -141,6 +129,9 @@ export function UserHeader({ activePage, setActivePage, isLoggedIn, user, onLogo
           <div className="flex items-center gap-4">
             {isLoggedIn ? (
               <>
+                {/* Notifications */}
+                <NotificationBell />
+                
                 {/* Saldo */}
                 <div className="hidden md:block bg-blue-50 px-4 py-2 rounded-lg">
                   <p className="text-xs text-gray-600">Saldo</p>

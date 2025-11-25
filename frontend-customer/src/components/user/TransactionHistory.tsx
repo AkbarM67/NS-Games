@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../../lib/api";
+import { useRealTime } from "../../hooks/useRealTime";
 import { Clock, CheckCircle, XCircle, Search, Filter, Eye, Download } from "lucide-react";
 import { Card, Badge, Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Dialog, DialogContent, DialogHeader, DialogTitle } from "../SimpleUI";
 
@@ -23,8 +24,22 @@ export function TransactionHistory() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Real-time WebSocket connection
+  useRealTime({
+    onOrderUpdate: (updatedOrder) => {
+      console.log('Order updated:', updatedOrder);
+      // Refresh transactions when order status changes
+      fetchTransactions();
+    }
+  });
+
   useEffect(() => {
     fetchTransactions();
+    
+    // Auto-refresh every 30 seconds for real-time order status
+    const interval = setInterval(fetchTransactions, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const fetchTransactions = async () => {
@@ -47,88 +62,14 @@ export function TransactionHistory() {
       }
     } catch (error) {
       console.error('Error fetching transactions:', error);
-      // Fallback ke data dummy jika API gagal
-      setTransactions(mockTransactions);
+      // Set empty array if API fails
+      setTransactions([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Mock data transaksi sebagai fallback
-  const mockTransactions: Transaction[] = [
-    {
-      id: "TRX001234",
-      product: "Mobile Legends 275 Diamonds",
-      category: "Game",
-      amount: "275 Diamonds",
-      price: 75000,
-      status: "success",
-      date: "2025-01-20",
-      time: "14:30:25",
-      paymentMethod: "QRIS",
-      targetAccount: "1234567890"
-    },
-    {
-      id: "TRX001235",
-      product: "Free Fire 100 Diamonds",
-      category: "Game",
-      amount: "100 Diamonds",
-      price: 15000,
-      status: "pending",
-      date: "2025-01-20",
-      time: "14:32:10",
-      paymentMethod: "VA BCA",
-      targetAccount: "9876543210"
-    },
-    {
-      id: "TRX001236",
-      product: "Pulsa Telkomsel 50.000",
-      category: "Pulsa",
-      amount: "50.000",
-      price: 51000,
-      status: "success",
-      date: "2025-01-20",
-      time: "14:35:42",
-      paymentMethod: "GoPay",
-      targetAccount: "081234567890"
-    },
-    {
-      id: "TRX001237",
-      product: "PUBG Mobile 325 UC",
-      category: "Game",
-      amount: "325 UC",
-      price: 85000,
-      status: "failed",
-      date: "2025-01-19",
-      time: "10:15:30",
-      paymentMethod: "QRIS",
-      targetAccount: "1122334455"
-    },
-    {
-      id: "TRX001238",
-      product: "Genshin Impact 330 Genesis",
-      category: "Game",
-      amount: "330 Genesis",
-      price: 95000,
-      status: "success",
-      date: "2025-01-19",
-      time: "09:20:15",
-      paymentMethod: "VA BNI",
-      targetAccount: "6677889900"
-    },
-    {
-      id: "TRX001239",
-      product: "GoPay Rp 100.000",
-      category: "E-Wallet",
-      amount: "Rp 100.000",
-      price: 101000,
-      status: "success",
-      date: "2025-01-18",
-      time: "16:45:20",
-      paymentMethod: "QRIS",
-      targetAccount: "081298765432"
-    },
-  ];
+
 
   // Filter transaksi
   const filteredTransactions = transactions.filter(trx => {
@@ -326,7 +267,8 @@ export function TransactionHistory() {
 
         {filteredTransactions.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">Tidak ada transaksi ditemukan</p>
+            <p className="text-gray-500">Belum ada transaksi</p>
+            <p className="text-sm text-gray-400 mt-2">Transaksi akan muncul setelah Anda melakukan pembelian</p>
           </div>
         )}
       </Card>

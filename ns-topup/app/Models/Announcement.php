@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Announcement extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'title',
-        'content', 
+        'content',
         'type',
         'is_active'
     ];
-    
+
     protected $casts = [
         'is_active' => 'boolean'
     ];

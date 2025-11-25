@@ -47,6 +47,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_blocked' => 'boolean',
+        'balance' => 'decimal:2',
     ];
 
     public function orders()
@@ -67,5 +68,15 @@ class User extends Authenticatable
     public function isCustomer()
     {
         return $this->role === 'customer';
+    }
+
+    public function balanceTopups()
+    {
+        return $this->hasMany(BalanceTopup::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 }

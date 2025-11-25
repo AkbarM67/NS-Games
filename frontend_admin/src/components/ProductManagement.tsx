@@ -27,6 +27,7 @@ interface Product {
   profit: number;
   status: "active" | "inactive";
   stock: number | "unlimited";
+  image?: string;
 }
 
 export function ProductManagement() {
@@ -84,6 +85,7 @@ export function ProductManagement() {
           profit: item.profit,
           status: item.is_active ? 'active' : 'inactive',
           stock: item.stock === -1 ? 'unlimited' : item.stock,
+          image: item.image,
           db_id: item.id
         }));
         setProducts(transformedProducts);
@@ -391,9 +393,22 @@ export function ProductManagement() {
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                    <Package className="w-6 h-6 text-white" />
-                  </div>
+                  {product.image ? (
+                    <img 
+                      src={product.image} 
+                      alt={product.name}
+                      className="w-12 h-12 rounded-lg object-cover"
+                      onError={(e) => {
+                        // Fallback to icon if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.outerHTML = '<div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center"><svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                      <Package className="w-6 h-6 text-white" />
+                    </div>
+                  )}
                   <div>
                     <Badge variant="outline" className="mb-1">{product.category}</Badge>
                     <p className="text-xs text-gray-500">{product.id}</p>
